@@ -150,7 +150,7 @@ def create_pdf_report(grading_results):
         pdf.multi_cell(0, 10, f"Grading Report {i+1}: {result['filename']}\n\n{result['content']}")
     
     # Return PDF as bytes
-    return pdf.output()
+    return bytes(pdf.output())
 
 def extract_csv_from_reports(grading_results):
     """Extract structured CSV data from grading results"""
