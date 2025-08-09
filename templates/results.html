@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grading Results - AI Grading Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .success-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            color: #28a745;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        
+        .stats {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e5e9;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .stat-value {
+            color: #667eea;
+            font-weight: 700;
+        }
+        
+        .download-section {
+            margin-bottom: 30px;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .download-btn.csv {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .download-btn.csv:hover {
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.4);
+        }
+        
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+        
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        
+        .flash-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .file-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+        
+        .file-info strong {
+            color: #533f03;
+        }
+        
+        .results-section, .csv-section {
+            margin: 40px 0;
+            text-align: left;
+        }
+        
+        .results-section h2, .csv-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .grading-report {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .grading-report h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .report-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .csv-table-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e1e5e9;
+            overflow-x: auto;
+        }
+        
+        .csv-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        
+        .csv-table td {
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            vertical-align: top;
+        }
+        
+        .csv-table tr:first-child td {
+            background: #f8f9ff;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .csv-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .csv-raw {
+            margin-top: 20px;
+        }
+        
+        .csv-raw h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .csv-raw textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            background: #f8f9fa;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">✅</div>
+        <h1>Grading Complete!</h1>
+        <p class="subtitle">Your assignments have been successfully processed</p>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message flash-success">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">📄 Files Processed</span>
+                <span class="stat-value">{{ num_files }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">📊 Reports Generated</span>
+                <span class="stat-value">2</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">⚡ Processing Status</span>
+                <span class="stat-value">Complete</span>
+            </div>
+        </div>
+        
+        <!-- Grading Results Section -->
+        <div class="results-section">
+            <h2>📄 Detailed Grading Reports</h2>
+            {% for result in grading_results %}
+            <div class="grading-report">
+                <h3>{{ result.filename }}</h3>
+                <div class="report-content">{{ result.content }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- CSV Summary Section -->
+        <div class="csv-section">
+            <h2>📊 CSV Summary</h2>
+            {% if csv_data %}
+            <div class="csv-table-container">
+                <table class="csv-table">
+                    {% for row in csv_data %}
+                    <tr>
+                        {% for cell in row %}
+                        <td>{{ cell }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            {% endif %}
+            
+            <div class="csv-raw">
+                <h3>Raw CSV Data</h3>
+                <textarea readonly>{{ csv_text }}</textarea>
+            </div>
+        </div>
+        
+        <a href="/" class="back-btn">← Grade More Assignments</a>
+    </div>
+</body>
+</html>

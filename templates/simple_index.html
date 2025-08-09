@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Grading Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        
+        .upload-section {
+            margin-bottom: 30px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+        
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+        }
+        
+        .upload-icon {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .upload-subtext {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        #pdf_files {
+            display: none;
+        }
+        
+        .file-list {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .file-icon {
+            color: #dc3545;
+            margin-right: 10px;
+        }
+        
+        .rubric-section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        
+        .flash-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 AI Grading Assistant</h1>
+        <p class="subtitle">Upload PDF assignments and get AI-powered grading with detailed reports</p>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message flash-error">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" action="/grade" enctype="multipart/form-data" id="gradingForm">
+            <div class="upload-section">
+                <div class="upload-area" onclick="document.getElementById('pdf_files').click()">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">Click to select PDF files</div>
+                    <div class="upload-subtext">or drag and drop files here</div>
+                </div>
+                <input type="file" id="pdf_files" name="pdf_files" multiple accept=".pdf" required>
+                <div class="file-list" id="fileList"></div>
+            </div>
+            
+            <div class="rubric-section">
+                <div class="section-title">📋 Grading Rubric</div>
+                <textarea name="rubric" placeholder="Enter your grading rubric here...">Grade this exam relative to the below rubric. Return your response as a short note with any deductions and total points scored along with the student name.
+Total Points: 100
+
+Submission Requirements (5 points)
+- Academic integrity statement included and personalized (3 points)
+- Proper file naming convention with UID (.Rmd and .pdf files) (2 points)
+
+Deductions
+- Failure to knit Rmd to PDF: -10 points
+- Using HTML-to-PDF conversion instead of direct knitting: -5 points
+- Poor code style (not following Tidyverse guidelines): -2 points per major violation
+- Including install.packages() in Rmd: -3 points
+
+Question 1: Data Analysis (25 points)
+- Correct methodology and implementation (15 points)
+- Proper code documentation and style (5 points)
+- Accurate results and interpretation (5 points)
+
+Question 2: Statistical Methods (25 points)
+- Appropriate statistical tests used (10 points)
+- Correct implementation (10 points)
+- Clear explanation of results (5 points)
+
+Question 3: Data Visualization (25 points)
+- Appropriate chart types selected (10 points)
+- Clear and well-labeled visualizations (10 points)
+- Proper interpretation of visual results (5 points)
+
+Question 4: Written Analysis (20 points)
+- Clear and coherent writing (10 points)
+- Logical flow and organization (5 points)
+- Proper conclusions drawn from analysis (5 points)</textarea>
+            </div>
+            
+            <button type="submit" class="btn" id="submitBtn">
+                🚀 Start Grading
+            </button>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing assignments... This may take a few minutes.</p>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        const fileInput = document.getElementById('pdf_files');
+        const fileList = document.getElementById('fileList');
+        const uploadArea = document.querySelector('.upload-area');
+        const form = document.getElementById('gradingForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        
+        // File input change handler
+        fileInput.addEventListener('change', updateFileList);
+        
+        // Drag and drop handlers
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = Array.from(e.dataTransfer.files).filter(file => 
+                file.type === 'application/pdf'
+            );
+            
+            if (files.length > 0) {
+                fileInput.files = createFileList(files);
+                updateFileList();
+            }
+        });
+        
+        // Form submission handler
+        form.addEventListener('submit', (e) => {
+            if (fileInput.files.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one PDF file.');
+                return;
+            }
+            
+            submitBtn.style.display = 'none';
+            loading.style.display = 'block';
+        });
+        
+        function updateFileList() {
+            const files = Array.from(fileInput.files);
+            
+            if (files.length === 0) {
+                fileList.style.display = 'none';
+                return;
+            }
+            
+            fileList.style.display = 'block';
+            fileList.innerHTML = '<h4>Selected Files:</h4>';
+            
+            files.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span class="file-icon">📄</span>
+                    <span>${file.name}</span>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+        
+        function createFileList(files) {
+            const dt = new DataTransfer();
+            files.forEach(file => dt.items.add(file));
+            return dt.files;
+        }
+    </script>
+</body>
+</html>
