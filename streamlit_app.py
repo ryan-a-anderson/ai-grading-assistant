@@ -126,7 +126,7 @@ def grade_pdf(pdf_bytes, filename, rubric):
     """Grade a single PDF using Gemini API"""
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=[
                 types.Part.from_bytes(
                     data=pdf_bytes,
@@ -165,7 +165,7 @@ def extract_csv_from_reports(grading_results):
     
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=[combined_text + "\n\n" + pdf_prompt]
         )
         return response.text if hasattr(response, 'text') else response.candidates[0].content.parts[0].text
