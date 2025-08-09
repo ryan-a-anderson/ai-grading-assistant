@@ -143,17 +143,14 @@ def create_pdf_report(grading_results):
     """Create a PDF report from grading responses"""
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.set_font("Arial", size=12)
+    pdf.set_font("Helvetica", size=12)
     
     for i, result in enumerate(grading_results):
         pdf.add_page()
         pdf.multi_cell(0, 10, f"Grading Report {i+1}: {result['filename']}\n\n{result['content']}")
     
     # Return PDF as bytes
-    pdf_output = pdf.output()
-    if isinstance(pdf_output, str):
-        return pdf_output.encode('latin-1')
-    return pdf_output
+    return pdf.output()
 
 def extract_csv_from_reports(grading_results):
     """Extract structured CSV data from grading results"""
