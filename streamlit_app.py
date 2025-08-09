@@ -126,7 +126,7 @@ def grade_pdf(pdf_bytes, filename, rubric):
     """Grade a single PDF using Gemini API"""
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash-exp",
+            model="gemini-2.0-flash",
             contents=[
                 types.Part.from_bytes(
                     data=pdf_bytes,
@@ -150,7 +150,10 @@ def create_pdf_report(grading_results):
         pdf.multi_cell(0, 10, f"Grading Report {i+1}: {result['filename']}\n\n{result['content']}")
     
     # Return PDF as bytes
-    return pdf.output(dest='S').encode('latin-1')
+    pdf_output = pdf.output()
+    if isinstance(pdf_output, str):
+        return pdf_output.encode('latin-1')
+    return pdf_output
 
 def extract_csv_from_reports(grading_results):
     """Extract structured CSV data from grading results"""
@@ -165,7 +168,7 @@ def extract_csv_from_reports(grading_results):
     
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash-exp",
+            model="gemini-2.0-flash",
             contents=[combined_text + "\n\n" + pdf_prompt]
         )
         return response.text if hasattr(response, 'text') else response.candidates[0].content.parts[0].text
