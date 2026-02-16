@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI Grading Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-user span {
+            opacity: 0.9;
+        }
+
+        .nav-user a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+            transition: background 0.3s ease;
+        }
+
+        .nav-user a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .dashboard-header {
+            margin-bottom: 40px;
+        }
+
+        .dashboard-header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .dashboard-header p {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .new-assignment-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .new-assignment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .assignments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .assignment-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-left: 4px solid #4facfe;
+        }
+
+        .assignment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .assignment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .assignment-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .assignment-date {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-processing {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .assignment-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .assignment-stat {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .assignment-stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .assignment-stat-label {
+            color: #666;
+            font-size: 0.8em;
+        }
+
+        .assignment-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #4facfe;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2196f3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .empty-state h3 {
+            color: #666;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+        .empty-state p {
+            color: #999;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 2em;
+            }
+            
+            .action-bar {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .stats {
+                justify-content: center;
+            }
+            
+            .assignments-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">🎓 AI Grading Assistant</div>
+            <div class="nav-user">
+                <span>Welcome, {{ current_user.username }}!</span>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>📊 Dashboard</h1>
+            <p>Manage your grading assignments and view results</p>
+        </div>
+
+        <div class="action-bar">
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number">{{ assignments|length }}</div>
+                    <div class="stat-label">Total Assignments</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">{{ assignments|selectattr('status', 'equalto', 'completed')|list|length }}</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">{{ assignments|map(attribute='graded_count')|sum }}</div>
+                    <div class="stat-label">Total Graded</div>
+                </div>
+            </div>
+            <a href="{{ url_for('grade') }}" class="new-assignment-btn">
+                ➕ New Assignment
+            </a>
+        </div>
+
+        {% if assignments %}
+            <div class="assignments-grid">
+                {% for assignment in assignments %}
+                    <div class="assignment-card">
+                        <div class="assignment-header">
+                            <div>
+                                <div class="assignment-title">{{ assignment.title }}</div>
+                                <div class="assignment-date">{{ assignment.created_at.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                            </div>
+                            <div class="status-badge status-{{ assignment.status }}">
+                                {{ assignment.status }}
+                            </div>
+                        </div>
+
+                        {% if assignment.status == 'completed' %}
+                            <div class="assignment-stats">
+                                <div class="assignment-stat">
+                                    <div class="assignment-stat-number">{{ assignment.graded_count }}</div>
+                                    <div class="assignment-stat-label">Graded</div>
+                                </div>
+                                <div class="assignment-stat">
+                                    <div class="assignment-stat-number">{{ assignment.error_count }}</div>
+                                    <div class="assignment-stat-label">Errors</div>
+                                </div>
+                            </div>
+
+                            <div class="assignment-actions">
+                                <a href="{{ url_for('download_report', assignment_id=assignment.id, file_type='pdf') }}" 
+                                   class="btn-small btn-primary">📄 PDF Report</a>
+                                <a href="{{ url_for('download_report', assignment_id=assignment.id, file_type='csv') }}" 
+                                   class="btn-small btn-secondary">📊 CSV Report</a>
+                            </div>
+                        {% elif assignment.status == 'processing' %}
+                            <div style="text-align: center; padding: 20px; color: #856404;">
+                                ⏳ Processing submissions...
+                            </div>
+                        {% else %}
+                            <div style="text-align: center; padding: 20px; color: #721c24;">
+                                ❌ Error occurred during processing
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h3>🎯 Ready to Start Grading?</h3>
+                <p>You haven't created any assignments yet. Upload your first batch of student submissions to get started!</p>
+                <a href="{{ url_for('grade') }}" class="new-assignment-btn">
+                    🚀 Create First Assignment
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

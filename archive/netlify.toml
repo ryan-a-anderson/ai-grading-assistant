@@ -1,0 +1,16 @@
+[build]
+  publish = "templates"
+  command = "pip install -r requirements.txt"
+
+[functions]
+  directory = "."
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[dev]
+  command = "python app.py"
+  port = 8080
+  targetPort = 8080
